@@ -488,19 +488,13 @@ int yy_flex_debug = 0;
 char *yytext;
 #line 1 "part2.l"
 #line 2 "part2.l"
-/*
- * part2.l  –  Forth Lexer for Phase 2
- *
- * Returns token codes (defined in part2.tab.h) instead of printing.
- * Token matching order matters: keywords / multi-char ops are listed
- * before the generic identifier / single-char rules.
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "part2.tab.h"
-#line 503 "lex.yy.c"
-#line 504 "lex.yy.c"
+extern YYSTYPE yylval;
+#line 497 "lex.yy.c"
+#line 498 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -717,10 +711,10 @@ YY_DECL
 		}
 
 	{
-#line 15 "part2.l"
+#line 9 "part2.l"
 
 
-#line 724 "lex.yy.c"
+#line 718 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -779,137 +773,137 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 17 "part2.l"
+#line 11 "part2.l"
 { return KW_IF;       }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 18 "part2.l"
+#line 12 "part2.l"
 { return KW_ELSE;     }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 19 "part2.l"
+#line 13 "part2.l"
 { return KW_THEN;     }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 20 "part2.l"
+#line 14 "part2.l"
 { return KW_BEGIN;    }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 21 "part2.l"
+#line 15 "part2.l"
 { return KW_REPEAT;   }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 22 "part2.l"
+#line 16 "part2.l"
 { return KW_VARIABLE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 24 "part2.l"
+#line 18 "part2.l"
 { return OP_DIVMOD;   }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 25 "part2.l"
+#line 19 "part2.l"
 { return OP_MOD;      }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 27 "part2.l"
+#line 21 "part2.l"
 { return OP_AND;      }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 28 "part2.l"
+#line 22 "part2.l"
 { return OP_OR;       }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 29 "part2.l"
+#line 23 "part2.l"
 { return OP_INVERT;   }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 30 "part2.l"
+#line 24 "part2.l"
 { return OP_ABS;      }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 31 "part2.l"
+#line 25 "part2.l"
 { return OP_NEGATE;   }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 33 "part2.l"
+#line 27 "part2.l"
 { return OP_GEQ;      }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 34 "part2.l"
+#line 28 "part2.l"
 { return OP_LEQ;      }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 35 "part2.l"
+#line 29 "part2.l"
 { return OP_NEQ;      }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 36 "part2.l"
+#line 30 "part2.l"
 { return OP_EQ;       }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 37 "part2.l"
+#line 31 "part2.l"
 { return OP_GT;       }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 38 "part2.l"
+#line 32 "part2.l"
 { return OP_LT;       }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 40 "part2.l"
+#line 34 "part2.l"
 { return OP_PLUS;     }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 41 "part2.l"
+#line 35 "part2.l"
 { return OP_MINUS;    }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 42 "part2.l"
+#line 36 "part2.l"
 { return OP_MUL;      }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 43 "part2.l"
+#line 37 "part2.l"
 { return OP_DIV;      }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 45 "part2.l"
+#line 39 "part2.l"
 { return OP_STORE;    }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 46 "part2.l"
+#line 40 "part2.l"
 { return OP_FETCH;    }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 47 "part2.l"
+#line 41 "part2.l"
 { return OP_PRINT;    }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 49 "part2.l"
+#line 43 "part2.l"
 {
                 yylval.ival = atoi(yytext);
                 return NUMBER;
@@ -917,7 +911,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 54 "part2.l"
+#line 48 "part2.l"
 {
                 yylval.sval = strdup(yytext);
                 return IDENTIFIER;
@@ -926,22 +920,22 @@ YY_RULE_SETUP
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 59 "part2.l"
-{ /* skip whitespace */ }
+#line 53 "part2.l"
+{ /*skip the spaces*/ }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 61 "part2.l"
+#line 55 "part2.l"
 {
                 fprintf(stderr, "Lexical error: unknown token '%s'\n", yytext);
             }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 65 "part2.l"
+#line 59 "part2.l"
 ECHO;
 	YY_BREAK
-#line 945 "lex.yy.c"
+#line 939 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1946,7 +1940,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 65 "part2.l"
+#line 59 "part2.l"
 
 
 int yywrap(void) { return 1; }

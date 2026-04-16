@@ -1,15 +1,9 @@
 %{
-/*
- * part2.l  –  Forth Lexer for Phase 2
- *
- * Returns token codes (defined in part2.tab.h) instead of printing.
- * Token matching order matters: keywords / multi-char ops are listed
- * before the generic identifier / single-char rules.
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "part2.tab.h"
+extern YYSTYPE yylval;
 %}
 
 %%
@@ -21,7 +15,7 @@
 "REPEAT"    { return KW_REPEAT;   }
 "VARIABLE"  { return KW_VARIABLE; }
 
-"/MOD"      { return OP_DIVMOD;   }
+"\/MOD"      { return OP_DIVMOD;   }
 "MOD"       { return OP_MOD;      }
 
 "AND"       { return OP_AND;      }
@@ -51,12 +45,12 @@
                 return NUMBER;
             }
 
-[_a-zA-Z][_a-zA-Z0-9\-]* {
+[_a-zA-Z][_a-zA-Z0-9-]* {
                 yylval.sval = strdup(yytext);
                 return IDENTIFIER;
             }
 
-[ \t\n\r]+  { /* skip whitespace */ }
+[ \t\n\r]+  { /*skip the spaces*/ }
 
 .           {
                 fprintf(stderr, "Lexical error: unknown token '%s'\n", yytext);
