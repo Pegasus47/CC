@@ -7,8 +7,8 @@ lex part2.l
 # 3. Compile Bison output
 gcc -Wall -Wno-unused-function -c part2.tab.c
 
-# 4. Compile Flex output
+# 4. Compile Lex output and Link everything
 cc lex.yy.c part2.tab.c -o program
 
-# 5. Link everything
-gcc -Wall -Wno-unused-function -o forth_parser part2.tab.o lex.yy.o -lfl
+# 6. Running the final code
+./program <filename>

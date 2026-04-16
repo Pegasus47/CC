@@ -7,6 +7,8 @@ extern int   yylex(void);
 extern FILE *yyin;
 void yyerror(const char *s);
 
+static FILE *output_file = NULL;  
+
 static int temp_count  = 0;
 static int label_count = 0;
 
@@ -81,9 +83,9 @@ if_marker
     {
         char *cond   = vpop();
         char *l_else = new_label();
-        printf("  ifFalse %s goto %s\n", cond, l_else);
+        fprintf(output_file, "  ifFalse %s goto %s\n", cond, l_else);
         free(cond);
-        lpush(l_else);          
+        lpush(l_else);
     }
     ;
 
@@ -92,8 +94,8 @@ else_marker
     {
         char *l_end  = new_label();
         char *l_else = lpop();  /* retrieve the label pushed by if_marker */
-        printf("  goto %s\n",  l_end);
-        printf("%s:\n",        l_else);
+        fprintf(output_file, "  goto %s\n",  l_end);
+        fprintf(output_file, "%s:\n",        l_else);
         free(l_else);
         lpush(l_end);           /* saved for THEN */
     }
@@ -103,7 +105,7 @@ begin_marker
     : /* e */
     {
         char *l = new_label();
-        printf("%s:\n", l);
+        fprintf(output_file, "%s:\n", l);
         lpush(l);               /* saved for REPEAT */
     }
     ;
@@ -119,7 +121,7 @@ word
     | IDENTIFIER OP_FETCH
     {
         char *t = new_temp();
-        printf("  %s = %s\n", t, $1);
+        fprintf(output_file, "  %s = %s\n", t, $1);
         free($1);
         vpush(t);
     }
@@ -133,7 +135,7 @@ word
     {
         char *addr = vpop();
         char *val  = vpop();
-        printf("  %s = %s\n", addr, val);
+        fprintf(output_file, "  %s = %s\n", addr, val);
         free(addr);
         free(val);
     }
@@ -141,7 +143,7 @@ word
     | OP_PRINT
     {
         char *v = vpop();
-        printf("  print %s\n", v);
+        fprintf(output_file, "  print %s\n", v);
         free(v);
     }
 
@@ -149,7 +151,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s + %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s + %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -158,7 +160,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s - %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s - %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -167,7 +169,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s * %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s * %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -176,7 +178,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s / %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s / %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -185,7 +187,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s MOD %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s MOD %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -194,18 +196,18 @@ word
     {
         char *r  = vpop(), *l = vpop();
         char *t1 = new_temp(), *t2 = new_temp();
-        printf("  %s = %s MOD %s\n", t1, l, r);
-        printf("  %s = %s / %s\n",   t2, l, r);
+        fprintf(output_file, "  %s = %s MOD %s\n", t1, l, r);
+        fprintf(output_file, "  %s = %s / %s\n",   t2, l, r);
         free(l); free(r);
-        vpush(t1);              /*remainder is lower one, quotient is upper one*/
-        vpush(t2);              
+        vpush(t1);              /* remainder is lower, quotient is upper */
+        vpush(t2);
     }
 
     | OP_EQ
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s == %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s == %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -214,7 +216,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s != %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s != %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -223,7 +225,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s < %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s < %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -232,7 +234,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s > %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s > %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -241,7 +243,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s <= %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s <= %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -250,7 +252,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s >= %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s >= %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -259,7 +261,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s AND %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s AND %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -268,7 +270,7 @@ word
     {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
-        printf("  %s = %s OR %s\n", t, l, r);
+        fprintf(output_file, "  %s = %s OR %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
@@ -277,7 +279,7 @@ word
     {
         char *v = vpop();
         char *t = new_temp();
-        printf("  %s = INVERT %s\n", t, v);
+        fprintf(output_file, "  %s = INVERT %s\n", t, v);
         free(v);
         vpush(t);
     }
@@ -286,7 +288,7 @@ word
     {
         char *v = vpop();
         char *t = new_temp();
-        printf("  %s = ABS %s\n", t, v);
+        fprintf(output_file, "  %s = ABS %s\n", t, v);
         free(v);
         vpush(t);
     }
@@ -295,28 +297,28 @@ word
     {
         char *v = vpop();
         char *t = new_temp();
-        printf("  %s = - %s\n", t, v);
+        fprintf(output_file, "  %s = - %s\n", t, v);
         free(v);
         vpush(t);
     }
 
     | KW_VARIABLE IDENTIFIER
     {
-        printf("  /* declare %s */\n", $2);
+        fprintf(output_file, "  /* declare %s */\n", $2);
         free($2);
     }
 
     | KW_IF if_marker word_seq KW_THEN
     {
         char *l = lpop();
-        printf("%s:\n", l);
+        fprintf(output_file, "%s:\n", l);
         free(l);
     }
 
     | KW_IF if_marker word_seq KW_ELSE else_marker word_seq KW_THEN
     {
         char *l = lpop();
-        printf("%s:\n", l);
+        fprintf(output_file, "%s:\n", l);
         free(l);
     }
 
@@ -324,7 +326,7 @@ word
     {
         char *cond    = vpop();
         char *l_begin = lpop();
-        printf("  ifTrue %s goto %s\n", cond, l_begin);
+        fprintf(output_file, "  ifTrue %s goto %s\n", cond, l_begin);  /* was sprintf — bug fix */
         free(cond);
         free(l_begin);
     }
@@ -341,20 +343,30 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
         return 1;
     }
+
     yyin = fopen(argv[1], "r");
     if (!yyin) {
         fprintf(stderr, "Error: cannot open '%s'\n", argv[1]);
         return 1;
     }
 
-    printf("=== Three-Address Code (TAC) Output ===\n\n");
+    output_file = fopen("output.txt", "w");
+    if (!output_file) {
+        fprintf(stderr, "Error: cannot open 'output.txt' for writing\n");
+        fclose(yyin);
+        return 1;
+    }
+
+    fprintf(output_file, "Three-Address Code (TAC) Output\n\n");
     int result = yyparse();
+
     fclose(yyin);
 
     if (result == 0)
-        printf("\n=== Parsing Successful ===\n");
+        fprintf(output_file, "\n=== Parsing Successful ===\n");
     else
-        printf("\n=== Parsing Failed ===\n");
+        fprintf(output_file, "\n=== Parsing Failed ===\n");
 
+    fclose(output_file);
     return result;
 }

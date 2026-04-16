@@ -47,12 +47,12 @@ extern YYSTYPE yylval;
  /*numbers*/
 [0-9]+      {yylval.ival = atoi(yytext); return NUMBER;}
 
-[_a-zA-Z][_a-zA-Z0-9\-]* {
+[_a-zA-Z][_a-zA-Z0-9-]* {
                 yylval.sval = strdup(yytext);
                 return IDENTIFIER;
             }
 
-[ \t\n\r]+  { /* skip whitespace */ }
+[ \t\n\r]+  { /*skip the spaces*/ }
 
 .           {printf("Unknown token %s \n",yytext);}
 
