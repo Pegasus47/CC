@@ -12,6 +12,20 @@ static FILE *output_file = NULL;
 static int temp_count  = 0;
 static int label_count = 0;
 
+static char *symtab[100];
+static int   symcount = 0;
+
+static void sym_declare(const char *name) {
+    if (symcount >= 100) { fprintf(stderr, "Error: symbol table full\n"); exit(1); }
+    symtab[symcount++] = strdup(name);
+}
+
+static int sym_exists(const char *name) {
+    for (int i = 0; i < symcount; i++)
+        if (strcmp(symtab[i], name) == 0) return 1;
+    return 0;
+}
+
 static char *new_temp(void) {
     char *t = malloc(16);
     sprintf(t, "t%d", temp_count++);
@@ -93,11 +107,11 @@ else_marker
     : /* e */
     {
         char *l_end  = new_label();
-        char *l_else = lpop();  /* retrieve the label pushed by if_marker */
+        char *l_else = lpop();  
         fprintf(output_file, "  goto %s\n",  l_end);
         fprintf(output_file, "%s:\n",        l_else);
         free(l_else);
-        lpush(l_end);           /* saved for THEN */
+        lpush(l_end);           
     }
     ;
 
@@ -106,7 +120,7 @@ begin_marker
     {
         char *l = new_label();
         fprintf(output_file, "%s:\n", l);
-        lpush(l);               /* saved for REPEAT */
+        lpush(l);               
     }
     ;
 
@@ -128,7 +142,9 @@ word
 
     | IDENTIFIER
     {
-        vpush($1);              /* vstack owns $1 */
+        if (!sym_exists($1))
+            fprintf(stderr, "Warning: '%s' used before declaration\n", $1);
+        vpush($1);             
     }
 
     | OP_STORE
@@ -199,7 +215,7 @@ word
         fprintf(output_file, "  %s = %s MOD %s\n", t1, l, r);
         fprintf(output_file, "  %s = %s / %s\n",   t2, l, r);
         free(l); free(r);
-        vpush(t1);              /* remainder is lower, quotient is upper */
+        vpush(t1);               
         vpush(t2);
     }
 
@@ -304,7 +320,8 @@ word
 
     | KW_VARIABLE IDENTIFIER
     {
-        fprintf(output_file, "  /* declare %s */\n", $2);
+        sym_declare($2);
+        fprintf(output_file,"  /* declare %s */\n", $2);
         free($2);
     }
 
@@ -326,7 +343,7 @@ word
     {
         char *cond    = vpop();
         char *l_begin = lpop();
-        fprintf(output_file, "  ifTrue %s goto %s\n", cond, l_begin);  /* was sprintf — bug fix */
+        fprintf(output_file, "  ifTrue %s goto %s\n", cond, l_begin); 
         free(cond);
         free(l_begin);
     }
