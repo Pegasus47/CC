@@ -85,14 +85,22 @@ static int label_count = 0;
 static char *symtab[100];
 static int   symcount = 0;
 
-static void sym_declare(const char *name) {
-    symtab[symcount++] = strdup(name);
-}
-
 static int sym_exists(const char *name) {
     for (int i = 0; i < symcount; i++)
         if (strcmp(symtab[i], name) == 0) return 1;
     return 0;
+}
+
+static void sym_declare(const char *name) {
+    if (symcount >= 100) { 
+        fprintf(stderr, "symbol table full"); 
+        exit(1); 
+    }
+    if (sym_exists(name)) {
+        printf("already declared\n");
+        return;
+    }
+    symtab[symcount++] = strdup(name);
 }
 
 static char *new_temp(void) {
@@ -112,12 +120,15 @@ static char *vstack[MAX_VS];
 static int   vtop = -1;
 
 static void vpush(char *s) {
-    if (vtop >= MAX_VS - 1) { fprintf(stderr, "Error: value stack overflow\n"); exit(1); }
+    if (vtop >= MAX_VS - 1) { fprintf(stderr, "value stack overflow\n"); exit(1); }
     vstack[++vtop] = s;
 }
 
 static char *vpop(void) {
-    if (vtop < 0) { fprintf(stderr, "Error: value stack underflow\n"); return strdup("??"); }
+    if (vtop < 0) { 
+        fprintf(stderr, "value stack underflow\n"); 
+        return strdup("??"); 
+    }
     return vstack[vtop--];
 }
 
@@ -126,16 +137,22 @@ static char *lstack[MAX_LS];
 static int   ltop = -1;
 
 static void lpush(char *l) {
-    if (ltop >= MAX_LS - 1) { fprintf(stderr, "Error: label stack overflow\n"); exit(1); }
+    if (ltop >= MAX_LS - 1) { 
+        fprintf(stderr, "label stack overflow\n"); 
+        exit(1); 
+    }
     lstack[++ltop] = l;
 }
 
 static char *lpop(void) {
-    if (ltop < 0) { fprintf(stderr, "Error: label stack underflow\n"); return strdup("??"); }
+    if (ltop < 0) { 
+        fprintf(stderr, "label stack underflow\n"); 
+        return strdup("??"); 
+    }
     return lstack[ltop--];
 }
 
-#line 139 "part2.tab.c"
+#line 156 "part2.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -589,10 +606,10 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    86,    86,    90,    91,    96,   107,   119,   127,   134,
-     142,   149,   158,   165,   174,   183,   192,   201,   210,   221,
-     230,   239,   248,   257,   266,   275,   284,   293,   302,   311,
-     320,   327,   334,   341
+       0,   101,   101,   103,   103,   106,   115,   125,   131,   136,
+     141,   145,   151,   155,   161,   167,   173,   179,   185,   193,
+     199,   205,   211,   217,   223,   229,   235,   241,   247,   253,
+     259,   263,   267,   271
 };
 #endif
 
@@ -1196,7 +1213,7 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* if_marker: %empty  */
-#line 96 "part2.y"
+#line 106 "part2.y"
     {
         char *cond   = vpop();
         char *l_else = new_label();
@@ -1204,11 +1221,11 @@ yyreduce:
         free(cond);
         lpush(l_else);
     }
-#line 1208 "part2.tab.c"
+#line 1225 "part2.tab.c"
     break;
 
   case 6: /* else_marker: %empty  */
-#line 107 "part2.y"
+#line 115 "part2.y"
     {
         char *l_end  = new_label();
         char *l_else = lpop();  
@@ -1217,135 +1234,135 @@ yyreduce:
         free(l_else);
         lpush(l_end);           
     }
-#line 1221 "part2.tab.c"
+#line 1238 "part2.tab.c"
     break;
 
   case 7: /* begin_marker: %empty  */
-#line 119 "part2.y"
+#line 125 "part2.y"
     {
         char *l = new_label();
         fprintf(output_file, "%s:\n", l);
         lpush(l);               
     }
-#line 1231 "part2.tab.c"
+#line 1248 "part2.tab.c"
     break;
 
   case 8: /* word: NUMBER  */
-#line 128 "part2.y"
+#line 132 "part2.y"
     {
         char *buf = malloc(32);
         sprintf(buf, "%d", (yyvsp[0].ival));
         vpush(buf);
     }
-#line 1241 "part2.tab.c"
+#line 1258 "part2.tab.c"
     break;
 
   case 9: /* word: IDENTIFIER OP_FETCH  */
-#line 135 "part2.y"
-    {
+#line 136 "part2.y"
+                            {
         char *t = new_temp();
         fprintf(output_file, "  %s = %s\n", t, (yyvsp[-1].sval));
         free((yyvsp[-1].sval));
         vpush(t);
     }
-#line 1252 "part2.tab.c"
+#line 1269 "part2.tab.c"
     break;
 
   case 10: /* word: IDENTIFIER  */
-#line 143 "part2.y"
-    {
+#line 141 "part2.y"
+                   {
         if (!sym_exists((yyvsp[0].sval)))
             fprintf(stderr, "Warning: '%s' used before declaration\n", (yyvsp[0].sval));
         vpush((yyvsp[0].sval));             
     }
-#line 1262 "part2.tab.c"
+#line 1279 "part2.tab.c"
     break;
 
   case 11: /* word: OP_STORE  */
-#line 150 "part2.y"
-    {
+#line 145 "part2.y"
+                 {
         char *addr = vpop();
         char *val  = vpop();
         fprintf(output_file, "  %s = %s\n", addr, val);
         free(addr);
         free(val);
     }
-#line 1274 "part2.tab.c"
+#line 1291 "part2.tab.c"
     break;
 
   case 12: /* word: OP_PRINT  */
-#line 159 "part2.y"
-    {
+#line 151 "part2.y"
+                 {
         char *v = vpop();
         fprintf(output_file, "  print %s\n", v);
         free(v);
     }
-#line 1284 "part2.tab.c"
+#line 1301 "part2.tab.c"
     break;
 
   case 13: /* word: OP_PLUS  */
-#line 166 "part2.y"
-    {
+#line 155 "part2.y"
+                {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s + %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1296 "part2.tab.c"
+#line 1313 "part2.tab.c"
     break;
 
   case 14: /* word: OP_MINUS  */
-#line 175 "part2.y"
-    {
+#line 161 "part2.y"
+                 {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s - %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1308 "part2.tab.c"
+#line 1325 "part2.tab.c"
     break;
 
   case 15: /* word: OP_MUL  */
-#line 184 "part2.y"
-    {
+#line 167 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s * %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1320 "part2.tab.c"
+#line 1337 "part2.tab.c"
     break;
 
   case 16: /* word: OP_DIV  */
-#line 193 "part2.y"
-    {
+#line 173 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s / %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1332 "part2.tab.c"
+#line 1349 "part2.tab.c"
     break;
 
   case 17: /* word: OP_MOD  */
-#line 202 "part2.y"
-    {
+#line 179 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s MOD %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1344 "part2.tab.c"
+#line 1361 "part2.tab.c"
     break;
 
   case 18: /* word: OP_DIVMOD  */
-#line 211 "part2.y"
-    {
+#line 185 "part2.y"
+                  {
         char *r  = vpop(), *l = vpop();
         char *t1 = new_temp(), *t2 = new_temp();
         fprintf(output_file, "  %s = %s MOD %s\n", t1, l, r);
@@ -1354,185 +1371,185 @@ yyreduce:
         vpush(t1);               
         vpush(t2);
     }
-#line 1358 "part2.tab.c"
+#line 1375 "part2.tab.c"
     break;
 
   case 19: /* word: OP_EQ  */
-#line 222 "part2.y"
-    {
+#line 193 "part2.y"
+              {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s == %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1370 "part2.tab.c"
+#line 1387 "part2.tab.c"
     break;
 
   case 20: /* word: OP_NEQ  */
-#line 231 "part2.y"
-    {
+#line 199 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s != %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1382 "part2.tab.c"
+#line 1399 "part2.tab.c"
     break;
 
   case 21: /* word: OP_LT  */
-#line 240 "part2.y"
-    {
+#line 205 "part2.y"
+              {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s < %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1394 "part2.tab.c"
+#line 1411 "part2.tab.c"
     break;
 
   case 22: /* word: OP_GT  */
-#line 249 "part2.y"
-    {
+#line 211 "part2.y"
+              {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s > %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1406 "part2.tab.c"
+#line 1423 "part2.tab.c"
     break;
 
   case 23: /* word: OP_LEQ  */
-#line 258 "part2.y"
-    {
+#line 217 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s <= %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1418 "part2.tab.c"
+#line 1435 "part2.tab.c"
     break;
 
   case 24: /* word: OP_GEQ  */
-#line 267 "part2.y"
-    {
+#line 223 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s >= %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1430 "part2.tab.c"
+#line 1447 "part2.tab.c"
     break;
 
   case 25: /* word: OP_AND  */
-#line 276 "part2.y"
-    {
+#line 229 "part2.y"
+               {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s AND %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1442 "part2.tab.c"
+#line 1459 "part2.tab.c"
     break;
 
   case 26: /* word: OP_OR  */
-#line 285 "part2.y"
-    {
+#line 235 "part2.y"
+              {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s OR %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
     }
-#line 1454 "part2.tab.c"
+#line 1471 "part2.tab.c"
     break;
 
   case 27: /* word: OP_INVERT  */
-#line 294 "part2.y"
-    {
+#line 241 "part2.y"
+                  {
         char *v = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = INVERT %s\n", t, v);
         free(v);
         vpush(t);
     }
-#line 1466 "part2.tab.c"
+#line 1483 "part2.tab.c"
     break;
 
   case 28: /* word: OP_ABS  */
-#line 303 "part2.y"
-    {
+#line 247 "part2.y"
+               {
         char *v = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = ABS %s\n", t, v);
         free(v);
         vpush(t);
     }
-#line 1478 "part2.tab.c"
+#line 1495 "part2.tab.c"
     break;
 
   case 29: /* word: OP_NEGATE  */
-#line 312 "part2.y"
-    {
+#line 253 "part2.y"
+                  {
         char *v = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = - %s\n", t, v);
         free(v);
         vpush(t);
     }
-#line 1490 "part2.tab.c"
+#line 1507 "part2.tab.c"
     break;
 
   case 30: /* word: KW_VARIABLE IDENTIFIER  */
-#line 321 "part2.y"
-    {
+#line 259 "part2.y"
+                               {
         sym_declare((yyvsp[0].sval));
         fprintf(output_file,"  /* declare %s */\n", (yyvsp[0].sval));
         free((yyvsp[0].sval));
     }
-#line 1500 "part2.tab.c"
+#line 1517 "part2.tab.c"
     break;
 
   case 31: /* word: KW_IF if_marker word_seq KW_THEN  */
-#line 328 "part2.y"
-    {
+#line 263 "part2.y"
+                                         {
         char *l = lpop();
         fprintf(output_file, "%s:\n", l);
         free(l);
     }
-#line 1510 "part2.tab.c"
+#line 1527 "part2.tab.c"
     break;
 
   case 32: /* word: KW_IF if_marker word_seq KW_ELSE else_marker word_seq KW_THEN  */
-#line 335 "part2.y"
-    {
+#line 267 "part2.y"
+                                                                      {
         char *l = lpop();
         fprintf(output_file, "%s:\n", l);
         free(l);
     }
-#line 1520 "part2.tab.c"
+#line 1537 "part2.tab.c"
     break;
 
   case 33: /* word: KW_BEGIN begin_marker word_seq KW_REPEAT  */
-#line 342 "part2.y"
-    {
+#line 271 "part2.y"
+                                                 {
         char *cond    = vpop();
         char *l_begin = lpop();
         fprintf(output_file, "  ifTrue %s goto %s\n", cond, l_begin); 
         free(cond);
         free(l_begin);
     }
-#line 1532 "part2.tab.c"
+#line 1549 "part2.tab.c"
     break;
 
 
-#line 1536 "part2.tab.c"
+#line 1553 "part2.tab.c"
 
       default: break;
     }
@@ -1725,42 +1742,32 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 351 "part2.y"
+#line 279 "part2.y"
 
 
 void yyerror(const char *s) {
-    fprintf(stderr, "\n*** Syntax Error: %s ***\n", s);
+    fprintf(stderr, "%s\n", s);
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
-        return 1;
-    }
+int main() {
 
-    yyin = fopen(argv[1], "r");
-    if (!yyin) {
-        fprintf(stderr, "Error: cannot open '%s'\n", argv[1]);
-        return 1;
-    }
-
+    yyin = fopen("syntax_error.fth", "r");
     output_file = fopen("output.txt", "w");
-    if (!output_file) {
-        fprintf(stderr, "Error: cannot open 'output.txt' for writing\n");
-        fclose(yyin);
-        return 1;
-    }
 
-    fprintf(output_file, "Three-Address Code (TAC) Output\n\n");
+    fprintf(output_file, "three address codes: \n");
     int result = yyparse();
 
     fclose(yyin);
 
-    if (result == 0)
-        fprintf(output_file, "\n=== Parsing Successful ===\n");
-    else
-        fprintf(output_file, "\n=== Parsing Failed ===\n");
+    if (result == 0){
+        fprintf(output_file, "Parsing Successful. \n");
+        printf("Parsing Successful. \n");
 
+    }
+    else{
+        fprintf(output_file, "Parsing Failed.\n");
+        printf("Parsing Failed. \n");
+    }
     fclose(output_file);
     return result;
 }

@@ -15,19 +15,22 @@ static int label_count = 0;
 static char *symtab[100];
 static int   symcount = 0;
 
-static void sym_declare(const char *name) {
-    if (symcount >= 100) { fprintf(stderr, "Error: symbol table full\n"); exit(1); }
-    if (sym_exists(name)) {
-        fprintf(stderr, "Warning: '%s' already declared\n", name);
-        return;
-    }
-    symtab[symcount++] = strdup(name);
-}
-
 static int sym_exists(const char *name) {
     for (int i = 0; i < symcount; i++)
         if (strcmp(symtab[i], name) == 0) return 1;
     return 0;
+}
+
+static void sym_declare(const char *name) {
+    if (symcount >= 100) { 
+        fprintf(stderr, "symbol table full"); 
+        exit(1); 
+    }
+    if (sym_exists(name)) {
+        printf("already declared\n");
+        return;
+    }
+    symtab[symcount++] = strdup(name);
 }
 
 static char *new_temp(void) {
@@ -47,12 +50,15 @@ static char *vstack[MAX_VS];
 static int   vtop = -1;
 
 static void vpush(char *s) {
-    if (vtop >= MAX_VS - 1) { fprintf(stderr, "Error: value stack overflow\n"); exit(1); }
+    if (vtop >= MAX_VS - 1) { fprintf(stderr, "value stack overflow\n"); exit(1); }
     vstack[++vtop] = s;
 }
 
 static char *vpop(void) {
-    if (vtop < 0) { fprintf(stderr, "Error: value stack underflow\n"); return strdup("??"); }
+    if (vtop < 0) { 
+        fprintf(stderr, "value stack underflow\n"); 
+        return strdup("??"); 
+    }
     return vstack[vtop--];
 }
 
@@ -61,12 +67,18 @@ static char *lstack[MAX_LS];
 static int   ltop = -1;
 
 static void lpush(char *l) {
-    if (ltop >= MAX_LS - 1) { fprintf(stderr, "Error: label stack overflow\n"); exit(1); }
+    if (ltop >= MAX_LS - 1) { 
+        fprintf(stderr, "label stack overflow\n"); 
+        exit(1); 
+    }
     lstack[++ltop] = l;
 }
 
 static char *lpop(void) {
-    if (ltop < 0) { fprintf(stderr, "Error: label stack underflow\n"); return strdup("??"); }
+    if (ltop < 0) { 
+        fprintf(stderr, "label stack underflow\n"); 
+        return strdup("??"); 
+    }
     return lstack[ltop--];
 }
 %}
@@ -78,7 +90,6 @@ static char *lpop(void) {
 
 %token <sval> IDENTIFIER
 %token <ival> NUMBER
-
 %token KW_VARIABLE KW_IF KW_ELSE KW_THEN KW_BEGIN KW_REPEAT
 %token OP_STORE OP_FETCH OP_PRINT
 %token OP_PLUS  OP_MINUS OP_MUL OP_DIV OP_MOD OP_DIVMOD
@@ -87,28 +98,20 @@ static char *lpop(void) {
 
 %%
 
-program
-    : word_seq
-    ;
+program : word_seq ;
 
-word_seq
-    : word_seq word
-    | /* e */
-    ;
+word_seq : word_seq word | /* e */ ;
 
-if_marker
-    : /* e */
+if_marker : /* e */
     {
         char *cond   = vpop();
         char *l_else = new_label();
         fprintf(output_file, "  ifFalse %s goto %s\n", cond, l_else);
         free(cond);
         lpush(l_else);
-    }
-    ;
+    } ;
 
-else_marker
-    : /* e */
+else_marker : /* e */
     {
         char *l_end  = new_label();
         char *l_else = lpop();  
@@ -116,104 +119,70 @@ else_marker
         fprintf(output_file, "%s:\n",        l_else);
         free(l_else);
         lpush(l_end);           
-    }
-    ;
+    };
 
-begin_marker
-    : /* e */
+begin_marker : /* e */
     {
         char *l = new_label();
         fprintf(output_file, "%s:\n", l);
         lpush(l);               
-    }
-    ;
+    };
 
-word
-    : NUMBER
+word : NUMBER
     {
         char *buf = malloc(32);
         sprintf(buf, "%d", $1);
         vpush(buf);
-    }
-
-    | IDENTIFIER OP_FETCH
-    {
+    } | IDENTIFIER OP_FETCH {
         char *t = new_temp();
         fprintf(output_file, "  %s = %s\n", t, $1);
         free($1);
         vpush(t);
-    }
-
-    | IDENTIFIER
-    {
+    } | IDENTIFIER {
         if (!sym_exists($1))
             fprintf(stderr, "Warning: '%s' used before declaration\n", $1);
         vpush($1);             
-    }
-
-    | OP_STORE
-    {
+    } | OP_STORE {
         char *addr = vpop();
         char *val  = vpop();
         fprintf(output_file, "  %s = %s\n", addr, val);
         free(addr);
         free(val);
-    }
-
-    | OP_PRINT
-    {
+    } | OP_PRINT {
         char *v = vpop();
         fprintf(output_file, "  print %s\n", v);
         free(v);
-    }
-
-    | OP_PLUS
-    {
+    } | OP_PLUS {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s + %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_MINUS
-    {
+    } | OP_MINUS {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s - %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_MUL
-    {
+    } | OP_MUL {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s * %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_DIV
-    {
+    } | OP_DIV {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s / %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_MOD
-    {
+    } | OP_MOD {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s MOD %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_DIVMOD
-    {
+    } | OP_DIVMOD {
         char *r  = vpop(), *l = vpop();
         char *t1 = new_temp(), *t2 = new_temp();
         fprintf(output_file, "  %s = %s MOD %s\n", t1, l, r);
@@ -221,172 +190,115 @@ word
         free(l); free(r);
         vpush(t1);               
         vpush(t2);
-    }
-
-    | OP_EQ
-    {
+    } | OP_EQ {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s == %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_NEQ
-    {
+    } | OP_NEQ {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s != %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_LT
-    {
+    } | OP_LT {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s < %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_GT
-    {
+    } | OP_GT {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s > %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_LEQ
-    {
+    } | OP_LEQ {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s <= %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_GEQ
-    {
+    } | OP_GEQ {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s >= %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_AND
-    {
+    } | OP_AND {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s AND %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_OR
-    {
+    } | OP_OR {
         char *r = vpop(), *l = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = %s OR %s\n", t, l, r);
         free(l); free(r);
         vpush(t);
-    }
-
-    | OP_INVERT
-    {
+    } | OP_INVERT {
         char *v = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = INVERT %s\n", t, v);
         free(v);
         vpush(t);
-    }
-
-    | OP_ABS
-    {
+    } | OP_ABS {
         char *v = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = ABS %s\n", t, v);
         free(v);
         vpush(t);
-    }
-
-    | OP_NEGATE
-    {
+    } | OP_NEGATE {
         char *v = vpop();
         char *t = new_temp();
         fprintf(output_file, "  %s = - %s\n", t, v);
         free(v);
         vpush(t);
-    }
-
-    | KW_VARIABLE IDENTIFIER
-    {
+    } | KW_VARIABLE IDENTIFIER {
         sym_declare($2);
         fprintf(output_file,"  /* declare %s */\n", $2);
         free($2);
-    }
-
-    | KW_IF if_marker word_seq KW_THEN
-    {
+    } | KW_IF if_marker word_seq KW_THEN {
         char *l = lpop();
         fprintf(output_file, "%s:\n", l);
         free(l);
-    }
-
-    | KW_IF if_marker word_seq KW_ELSE else_marker word_seq KW_THEN
-    {
+    } | KW_IF if_marker word_seq KW_ELSE else_marker word_seq KW_THEN {
         char *l = lpop();
         fprintf(output_file, "%s:\n", l);
         free(l);
-    }
-
-    | KW_BEGIN begin_marker word_seq KW_REPEAT
-    {
+    } | KW_BEGIN begin_marker word_seq KW_REPEAT {
         char *cond    = vpop();
         char *l_begin = lpop();
         fprintf(output_file, "  ifTrue %s goto %s\n", cond, l_begin); 
         free(cond);
         free(l_begin);
-    }
-    ;
+    } ;
 
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "\n*** Syntax Error: %s ***\n", s);
+    fprintf(stderr, "%s\n", s);
 }
 
 int main() {
-
-    yyin = fopen("sample.txt", "r");
-    if (!yyin) {
-        fprintf(stderr, "Error: cannot open '%s'\n", argv[1]);
-        return 1;
-    }
-
+    yyin = fopen("syntax_error.fth", "r");
     output_file = fopen("output.txt", "w");
-    if (!output_file) {
-        fprintf(stderr, "Error: cannot open 'output.txt' for writing\n");
-        fclose(yyin);
-        return 1;
-    }
 
-    fprintf(output_file, "Three-Address Code (TAC) Output\n\n");
+    fprintf(output_file, "three address codes: \n");
     int result = yyparse();
 
     fclose(yyin);
 
     if (result == 0){
-        fprintf(output_file, "Parsing Successful: \n");
-        printf("Parsing Successful: \n");
+        fprintf(output_file, "Parsing Successful. \n");
+        printf("Parsing Successful. \n");
 
     }
     else{
-        fprintf(output_file, "Parsing Failed: \n");
-        printf("Parsing Failed: \n");
+        fprintf(output_file, "Parsing Failed.\n");
+        printf("Parsing Failed. \n");
     }
     fclose(output_file);
     return result;
