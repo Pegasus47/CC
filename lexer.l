@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "part2.tab.h"
+#include "parser.tab.h"
 extern YYSTYPE yylval;
 %}
 

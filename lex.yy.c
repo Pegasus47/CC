@@ -491,7 +491,7 @@ char *yytext;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "part2.tab.h"
+#include "parser.tab.h"
 extern YYSTYPE yylval;
 #line 497 "lex.yy.c"
 #line 498 "lex.yy.c"

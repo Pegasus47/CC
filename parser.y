@@ -283,7 +283,7 @@ void yyerror(const char *s) {
 }
 
 int main() {
-    yyin = fopen("syntax_error.fth", "r");
+    yyin = fopen("sample.txt", "r");
     output_file = fopen("output.txt", "w");
 
     fprintf(output_file, "three address codes: \n");
