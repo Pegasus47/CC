@@ -283,7 +283,9 @@ void yyerror(const char *s) {
 }
 
 int main() {
-    yyin = fopen("sample.txt", "r");
+
+    // Please add the name of the file you want to parse.
+    yyin = fopen("valid_input.fth", "r");
     output_file = fopen("output.txt", "w");
 
     fprintf(output_file, "three address codes: \n");

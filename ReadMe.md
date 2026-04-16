@@ -12,3 +12,6 @@ cc lex.yy.c part2.tab.c -o program
 
 # 6. Running the final code
 ./program <filename>
+
+# 7. For convenience, you can directly run the script file
+./run.sh
