@@ -7,7 +7,7 @@
 
 %%
 
-//keywords 
+ /*keywords*/ 
 "IF"        {return KW_IF;}
 "ELSE"      {return KW_ELSE;}
 "THEN"      {return KW_THEN;}
@@ -15,18 +15,18 @@
 "REPEAT"    {return KW_REPEAT;}
 "VARIABLE"  {return KW_VARIABLE;}
 
-//arithmetic Operators 1
+ /*arithmetic operators 1*/
 "/MOD"      {return OP_DIVMOD;}
 "MOD"       {return OP_MOD;}
 
-//logical Operators
+ /*logical operators*/
 "AND"       {return OP_AND;}
 "OR"        {return OP_OR;}
 "INVERT"    {return OP_INVERT;}
 "ABS"       {return OP_ABS;}
 "NEGATE"    {return OP_NEGATE;}
 
-//relational Operators 
+ /*relational operators*/ 
 ">="        {return OP_GEQ;}
 "<="        {return OP_LEQ;}
 "<>"        {return OP_NEQ;}
@@ -34,24 +34,24 @@
 ">"         {return OP_GT;}
 "<"         {return OP_LT;}
 
-//arithmetic Operators 2
+ /*arithmetic operators 2*/
 "+"         {return OP_PLUS;}
 "-"         {return OP_MINUS;}
 "*"         {return OP_MUL;}
 "/"         {return OP_DIV;}
 
-"!"         {return OP_STORE;} //assignment operator
-"@"         {return OP_FETCH;} //address operator
-"."         {return OP_PRINT;} //stack output word
+"!"         {return OP_STORE;}  /*assignment operator*/
+"@"         {return OP_FETCH;}  /*address operator*/
+"."         {return OP_PRINT;}  /*stack output word*/
 
-//numbers
+ /*numbers*/
 [0-9]+      {yylval.ival = atoi(yytext); return NUMBER;}
 
-//identifiers
+ /*identifiers*/
 [_a-zA-Z][_a-zA-Z0-9\-]* {yylval.sval = strdup(yytext); return IDENTIFIER;}
 
-//do nothing 
-[\t\n\r]+  {}
+ /*do nothing*/
+[ \t\n\r]+  {}
 
 .           {printf("Unknown token %s \n",yytext);}
 
