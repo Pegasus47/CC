@@ -17,6 +17,10 @@ static int   symcount = 0;
 
 static void sym_declare(const char *name) {
     if (symcount >= 100) { fprintf(stderr, "Error: symbol table full\n"); exit(1); }
+    if (sym_exists(name)) {
+        fprintf(stderr, "Warning: '%s' already declared\n", name);
+        return;
+    }
     symtab[symcount++] = strdup(name);
 }
 
