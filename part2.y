@@ -375,10 +375,16 @@ int main() {
 
     fclose(yyin);
 
-    if (result == 0)
-        fprintf(output_file, "Parsing Successful : \n");
-    else
-        fprintf(output_file, "Parsing Failed : \n");
+    if (result == 0){
+        fprintf(output_file, "Parsing Successful: \n");
+        printf("Parsing Successful: \n");
+
+    }
+    else{
+        fprintf(output_file, "Parsing Failed: \n");
+        printf("Parsing Failed: \n");
+    }
+        
 
     fclose(output_file);
     return result;
