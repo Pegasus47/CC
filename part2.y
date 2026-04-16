@@ -388,8 +388,6 @@ int main() {
         fprintf(output_file, "Parsing Failed: \n");
         printf("Parsing Failed: \n");
     }
-        
-
     fclose(output_file);
     return result;
 }
