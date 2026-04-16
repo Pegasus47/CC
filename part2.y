@@ -355,13 +355,9 @@ void yyerror(const char *s) {
     fprintf(stderr, "\n*** Syntax Error: %s ***\n", s);
 }
 
-int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <input_file>\n", argv[0]);
-        return 1;
-    }
+int main() {
 
-    yyin = fopen(argv[1], "r");
+    yyin = fopen("sample.txt", "r");
     if (!yyin) {
         fprintf(stderr, "Error: cannot open '%s'\n", argv[1]);
         return 1;
@@ -380,9 +376,9 @@ int main(int argc, char *argv[]) {
     fclose(yyin);
 
     if (result == 0)
-        fprintf(output_file, "\n=== Parsing Successful ===\n");
+        fprintf(output_file, "Parsing Successful : \n");
     else
-        fprintf(output_file, "\n=== Parsing Failed ===\n");
+        fprintf(output_file, "Parsing Failed : \n");
 
     fclose(output_file);
     return result;
